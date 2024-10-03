@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Staff Profile</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        .profile-upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 50%;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .profile-upload-area:hover {
+            border-color: #0d6efd;
+            background-color: #f8f9fa;
+        }
+
+        .profile-upload-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #6c757d;
+            z-index: 1;
+        }
+
+        .profile-upload-area:hover .upload-overlay {
+            opacity: 1;
+        }
+
+        .upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .upload-overlay i {
+            color: white;
+            font-size: 2rem;
+        }
+
+        #profileInput {
+            display: none;
+        }
+
+        .skill-badge {
+            display: inline-block;
+            margin: 0.25rem;
+            padding: 0.5rem;
+            background-color: #e9ecef;
+            border-radius: 20px;
+        }
+
+        .skill-badge .remove-skill {
+            margin-left: 0.5rem;
+            cursor: pointer;
+            color: #dc3545;
+        }
+
+        .success-alert {
+            display: none;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="text-center mb-0">Add New Member</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="staffUploadForm" class="needs-validation" novalidate>
+                            <!-- Profile Picture Upload -->
+                            <div class="text-center mb-4">
+                                <div class="profile-upload-area" onclick="document.getElementById('profileInput').click()">
+                                    <div id="uploadIcon" class="upload-icon">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                    <div id="imagePreview"></div>
+                                    <div class="upload-overlay">
+                                        <i class="bi bi-camera-fill"></i>
+                                    </div>
+                                </div>
+                                <input type="file" id="profileInput" accept="image/*" onchange="previewProfile(this)">
+                                <small class="text-muted mt-2 d-block">Click to upload profile picture</small>
+                            </div>
+
+                            <!-- Full Name -->
+                            <div class="mb-4">
+                                <label for="staffName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="staffName" 
+                                       placeholder="Enter full name" required>
+                                <div class="invalid-feedback">
+                                    Please provide the member's member's name.
+                                </div>
+                            </div>
+
+                            <!-- Skills -->
+                            <div class="mb-4">
+                                <label for="skillInput" class="form-label">Skills</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="skillInput" 
+                                           placeholder="Add skills (press Enter to add)">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="addSkill()">
+                                        Add Skill
+                                    </button>
+                                </div>
+                                <div id="skillsContainer" class="mt-2"></div>
+                            </div>
+
+                            <!-- Introduction -->
+                            <div class="mb-4">
+                                <label for="introduction" class="form-label">Introduction</label>
+                                <textarea class="form-control" id="introduction" rows="4" 
+                                          placeholder="Write a brief introduction about the staff member" required></textarea>
+                                <div class="invalid-feedback">
+                                    Please provide an introduction.
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary w-100">
+                                Add Member
+                            </button>
+                        </form>
+
+                        <!-- Success Alert -->
+                        <div class="alert alert-success success-alert mt-3" id="successAlert" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            Board member added successfully!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const skills = new Set();
+
+        function previewProfile(input) {
+            const preview = document.getElementById('imagePreview');
+            const uploadIcon = document.getElementById('uploadIcon');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Profile Preview">`;
+                    uploadIcon.style.display = 'none';
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function addSkill() {
+            const skillInput = document.getElementById('skillInput');
+            const skill = skillInput.value.trim();
+            
+            if (skill && !skills.has(skill)) {
+                skills.add(skill);
+                updateSkillsDisplay();
+                skillInput.value = '';
+            }
+        }
+
+        function removeSkill(skill) {
+            skills.delete(skill);
+            updateSkillsDisplay();
+        }
+
+        function updateSkillsDisplay() {
+            const container = document.getElementById('skillsContainer');
+            container.innerHTML = Array.from(skills).map(skill => `
+                <span class="skill-badge">
+                    ${skill}
+                    <span class="remove-skill" onclick="removeSkill('${skill}')">
+                        <i class="bi bi-x"></i>
+                    </span>
+                </span>
+            `).join('');
+        }
+
+        // Handle Enter key in skills input
+        document.getElementById('skillInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addSkill();
+            }
+        });
+
+        // Form submission
+        document.getElementById('staffUploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!this.checkValidity()) {
+                e.stopPropagation();
+                this.classList.add('was-validated');
+                return;
+            }
+
+            // Collect form data
+            const formData = {
+                name: document.getElementById('staffName').value,
+                skills: Array.from(skills),
+                introduction: document.getElementById('introduction').value,
+                profile: document.getElementById('profileInput').files[0]
+            };
+
+            // Here you would typically send the data to your backend
+            console.log('Staff data to be submitted:', formData);
+
+            // Show success message
+            const successAlert = document.getElementById('successAlert');
+            successAlert.style.display = 'block';
+
+            // Hide success message after 3 seconds
+            setTimeout(() => {
+                successAlert.style.display = 'none';
+            }, 3000);
+
+            // Reset form
+            this.reset();
+            document.getElementById('imagePreview').innerHTML = '';
+            document.getElementById('uploadIcon').style.display = 'block';
+            skills.clear();
+            updateSkillsDisplay();
+            this.classList.remove('was-validated');
+        });
+    </script>
+</body>
+</html>

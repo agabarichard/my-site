@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Upload Form</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            display: none;
+            margin-top: 10px;
+        }
+        
+        .upload-box {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-box:hover {
+            border-color: #0d6efd;
+            background-color: #e9ecef;
+        }
+
+        .upload-box i {
+            font-size: 48px;
+            color: #6c757d;
+        }
+
+        .error-message {
+            display: none;
+            color: #dc3545;
+            margin-top: 5px;
+            font-size: 0.875rem;
+        }
+
+        .success-message {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Create New Event</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="eventForm" class="needs-validation" novalidate>
+                            <!-- Event Name -->
+                            <div class="mb-3">
+                                <label for="eventName" class="form-label">Event Name</label>
+                                <input type="text" class="form-control" id="eventName" required>
+                                <div class="invalid-feedback">
+                                    Please provide an event name.
+                                </div>
+                            </div>
+
+                            <!-- Event Date -->
+                            <div class="mb-3">
+                                <label for="eventDate" class="form-label">Event Date</label>
+                                <input type="date" class="form-control" id="eventDate" required>
+                                <div class="invalid-feedback">
+                                    Please select a date.
+                                </div>
+                            </div>
+
+                            <!-- Event Description -->
+                            <div class="mb-3">
+                                <label for="eventDescription" class="form-label">Event Description</label>
+                                <textarea class="form-control" id="eventDescription" rows="4" required></textarea>
+                                <div class="invalid-feedback">
+                                    Please provide an event description.
+                                </div>
+                            </div>
+
+                            <!-- Image Upload -->
+                            <div class="mb-3">
+                                <label class="form-label">Event Image</label>
+                                <div class="upload-box" onclick="document.getElementById('eventImage').click()">
+                                    <i class="bi bi-cloud-upload"></i>
+                                    <h5 class="mt-2">Click to Upload Image</h5>
+                                    <p class="text-muted mb-0">Supported formats: JPG, PNG, GIF</p>
+                                    <input type="file" class="d-none" id="eventImage" accept="image/*" required>
+                                </div>
+                                <img id="imagePreview" class="preview-image img-fluid rounded" alt="Preview">
+                                <div class="error-message" id="imageError"></div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Create Event</button>
+                            </div>
+                        </form>
+
+                        <!-- Success Message -->
+                        <div class="alert alert-success success-message" id="successMessage" role="alert">
+                            Event created successfully!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Preview image before upload
+        document.getElementById('eventImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            const errorMessage = document.getElementById('imageError');
+            
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            if (!validTypes.includes(file.type)) {
+                errorMessage.textContent = 'Please upload a valid image file (JPG, PNG, or GIF)';
+                errorMessage.style.display = 'block';
+                preview.style.display = 'none';
+                return;
+            }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                errorMessage.textContent = 'Image size should be less than 5MB';
+                errorMessage.style.display = 'block';
+                preview.style.display = 'none';
+                return;
+            }
+
+            errorMessage.style.display = 'none';
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        });
+
+        // Form validation and submission
+        document.getElementById('eventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!this.checkValidity()) {
+                e.stopPropagation();
+            } else {
+                // Here you would typically send the data to your server
+                // For demonstration, we'll just show the success message
+                document.getElementById('successMessage').style.display = 'block';
+                
+                // Reset form after successful submission
+                setTimeout(() => {
+                    this.reset();
+                    document.getElementById('imagePreview').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 3000);
+            }
+
+            this.classList.add('was-validated');
+        });
+    </script>
+</body>
+</html>
